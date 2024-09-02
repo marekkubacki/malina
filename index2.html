@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPIO Control</title>
+</head>
+<body>
+    <button id="onButton">ON</button>
+    <button id="offButton">OFF</button>
+    <script>
+        document.getElementById('onButton').addEventListener('click', function() {
+            fetch('/toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ action: 'on' }),
+            });
+        });
+
+        document.getElementById('offButton').addEventListener('click', function() {
+            fetch('/toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ action: 'off' }),
+            });
+        });
+    </script>
+</body>
+</html>
