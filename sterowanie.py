@@ -1,37 +1,49 @@
 import time
 import subprocess
+import json
+from datetime import datetime
 while(0==0):
-  time.sleep(30)
 
-  with open('/var/www/html/czasy.txt', 'r') as plik1:
-    czasy= int(plik1.read())
-    print(czasy)
+  aktualnyczas = round(time.time())	
+  time.sleep(3)
+  #Komenda do zmiany stanu GPIO
+  komenda_off = "/usr/local/bin/gpio -g mode 4 in"
+  komenda_on = "/usr/local/bin/gpio -g mode 4 out"
+  
+  print("alee")
+  with open('dane.json', 'r') as plik:
+    dane = json.load(plik)
 
-  aktualnyczas = round(time.time())
-  roznica= int(aktualnyczas-round(czasy))
-  print(roznica)
 
-  with open('/var/www/html/przelacznik.txt', 'r+') as plik2:
-    przelacznik= int(plik2.read())
-    if(przelacznik==1):
+
+
+  if(dane["przycisk"]==0):
+    if(dane["aktualnie"]!=0):
+      dane["ostatni"]=dane["aktualnie"]
+      
+    subprocess.call(komenda_off, shell=True)
+    dane["aktualnie"]=0
+
+	  
+  if(dane["przycisk"]==1):
         
-      # Komenda do zmiany stanu GPIO
-      komenda1 = "/usr/local/bin/gpio -g mode 4 out"
+    subprocess.call(komenda_on, shell=True)
 
-      # Wykonanie komendy
-      subprocess.call(komenda1, shell=True)
-        
-    if(przelacznik==1 and roznica>4*60*60):
-      print("wchodze")
-      plik2.seek(0)
-      plik2.write("0")
-      with open('/var/www/html/licznik.txt', 'r+') as plik3:
-        licznik=int(plik3.read())
-        licznik=int(licznik+roznica)
-        plik3.seek(0)
-        plik3.write(str(licznik))
-      # Komenda do zmiany stanu GPIO
-      komenda = "/usr/local/bin/gpio -g mode 4 in"
+      #sprawdzanie czy nie przekroczono czasu auto wylaczania
+    if(dane["auto_off"]<=dane["aktualnie"]):
+      dane["przycisk"]=0
+      subprocess.call(komenda_off, shell=True)
+	
+    # obliczenie ile czasu dodać do liczników
+    roznica = round(time.time()) - aktualnyczas
+    dane["licznik"]+=roznica
+    dane["aktualnie"]+=roznica
+    dane["miesiace"][datetime.now().month]+=roznica
 
-      # Wykonanie komendy
-      subprocess.call(komenda, shell=True)
+    
+  with open('dane.json', 'w') as plik:
+    json.dump(dane, plik, indent=4)
+	
+
+
+	  
