@@ -13,7 +13,7 @@
 				const godziny = Math.floor(sekundy / 3600); // Obliczanie godzin
 				const minuty = Math.floor((sekundy % 3600) / 60); // Obliczanie minut
 				const pozostaleSekundy = sekundy % 60; // Obliczanie sekund
-				return `${godziny} h ${minuty} min ${pozostaleSekundy} sec`;
+				return `${godziny} h : ${minuty} min : ${pozostaleSekundy} sec`;
 			}
 			function zwiekszaj_licznik(id) 
 			{
@@ -104,7 +104,7 @@
         <input style="cursor: pointer" type="submit" value="ON / OFF" name="onoff">
     </form>
 
-	
+	<div class='kolumna'>
 
 	
     <?php
@@ -114,7 +114,7 @@
             $sekundy %= 3600;
             $minuty = floor($sekundy / 60);
             $sekundy %= 60;
-            return($godziny."h : ".$minuty."min : ".$sekundy."sec");
+            return($godziny." h : ".$minuty." min : ".$sekundy." sec");
         }
 		
 		function rozbicie_do_minut($sekundy) 
@@ -123,7 +123,7 @@
             $sekundy %= 3600;
             $minuty = round($sekundy / 60);
 			if($godziny>0)
-				{return($godziny."h : ".$minuty."m");}
+				{return($godziny." h : ".$minuty." m");}
 			else
 				{return($minuty."m");}
         }
@@ -161,8 +161,8 @@
 		}
 		
 		
-		
 
+		
         $plik = 'dane.json';
         $dane = json_decode(file_get_contents($plik), true);
         $wlacz = $dane['przycisk'];
@@ -197,41 +197,59 @@
             } 
 			else 
 			{
-                echo("<p class=\"status grzeje\" style=\"color: red;\">Hasło niepoprawne</p>");
+                echo("<p class=\"status grzeje\" style=\"color: red;\">Hasło niepoprawne</p><br><br><br><br>");
             }
 
         }
-
+			
         if ($wlacz == 0) 
 		{
-            echo("<p class='status zimne'>Ogrzewanie - zimne</p>");
-			echo("<p id='testlicznik'>Czas pracy ogrzewania (licznik główny):<br>" . rozbicie_do_sekund($dane["licznik"]) . "</p>");
-			echo("<p>Czas pracy od ostatniego włączenia:<br>" . rozbicie_do_sekund($dane["aktualnie"]) . "</p>");
+            echo("<p class='status zimne'>Ogrzewanie - zimne</p></div>");
+			echo("<p>Czas pracy ogrzewania:</p>");
+			echo("<p class='status liczniki'>Licznik główny:<br>" . rozbicie_do_sekund($dane["licznik"]) . "</p>");
+			echo("<p class='status liczniki'>Dzisiaj:<br>" . rozbicie_do_sekund($dane["dzis"]) . "</p>");
+			echo("<p class='status liczniki'>Od ostatniego włączenia:<br>" . rozbicie_do_sekund($dane["aktualnie"]) . "</p>");
+			
         } 
 		else 
 		{	
+			echo("<p class='status grzeje'>Ogrzewanie - grzeje</p><br>");
 			$licznik_autooff=$dane['auto_off']-$dane['aktualnie']-1;
-			echo("<p class='status zimne'>czas auto off: <p class='status zimne' id='licznik_autooff'>{$licznik_autooff}</p></p>");
-            echo("<p class=\"status grzeje\">Ogrzewanie - grzeje</p>");
+			echo("<p class='status zimne' style='margin-right:-5px'>czas auto off: <p class='status zimne' id='licznik_autooff'>{$licznik_autooff}</p></p></div><br>");
+            
+			echo("<p>Czas pracy ogrzewania:</p>");
+			echo("<div class='status liczniki'><p>Licznik główny:</p><p id='licznik'>{$dane["licznik"]}</p></div>");
+			//echo("<p id='licznik'>{$dane["licznik"]}</p>");
+			echo("<div class='status liczniki'><p>Dzisiaj:</p><p id='dzis'>{$dane["dzis"]}</p></div>");
+			echo("<div class='status liczniki'><p>Od ostatniego włączenia:</p><p id='aktualnie'>{$dane["aktualnie"]}</p></div>");
 			
-			echo("<p id=\"testlicznik\">Czas pracy ogrzewania (licznik główny):</p>");
-			echo("<p id='licznik'>{$dane["licznik"]}</p>");
-			
-			echo("<p>Czas pracy od ostatniego włączenia:<br></p>");
-			echo("<p id='aktualnie'>{$dane["aktualnie"]}</p>");
+			//echo("<p class='status liczniki'>Czas pracy od ostatniego włączenia:<br></p>");
+			//echo("<p id='aktualnie'>{$dane["aktualnie"]}</p>");
 			
 			echo("<script> zmniejszaj_licznik('licznik_autooff');</script>");
 			echo("<script> zwiekszaj_licznik('licznik'); </script>");
-			echo("<script> zwiekszaj_licznik('aktualnie'); </script>");			
+			echo("<script> zwiekszaj_licznik('aktualnie'); </script>");
+			echo("<script> zwiekszaj_licznik('dzis'); </script>");			
         }
-
+		
+		// Użycie wttr.in do pobrania pogody w Warszawie
+		$pogoda = file_get_contents("https://wttr.in/Warsaw?format=%t");
+		// Sprawdzenie, czy dane zostały poprawnie pobrane
+		if ($pogoda !== false) 
+		{
+			echo "<div class='pogoda'>Aktualna temperatura w Warszawie:<a href='https://wttr.in/Warsaw?format=1'> $pogoda</a></div>";
+		} 
+		else 
+		{
+			echo "Nie udało się pobrać danych.";
+		}
 
 		
     ?>	
 
 
-	
-	zużycie w poszczególnych miesiącach:
+	<br><br><br><br>
+	<p>zużycie w poszczególnych miesiącach:</p>
     <div class="dane-miesieczne">
         <?php
 		

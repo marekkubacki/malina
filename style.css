@@ -55,11 +55,22 @@ p {
     font-weight: bold;
 }
 
+.kolumna {
+	width: 370px;
+	padding: 3px;
+    border-radius: 5px;
+
+    display: inline-block;
+	text-align: left;
+}
+.kolumna div{
+    
+}
 .status {
     padding: 10px;
-    border-radius: 5px;
-    margin-top: 20px;
+    border-radius: 7px;
     display: inline-block;
+	margin: 4px;
 }
 
 .zimne {
@@ -72,6 +83,14 @@ p {
     color: #721c24;
 }
 
+.liczniki {
+	background-color: #d4edda;
+	
+}
+.liczniki p {
+	margin-bottom: 0px;
+	margin-top: 0px;
+}
 .animacja-wlaczania {
     transition: all 0.3s ease-in-out;
 }
@@ -86,7 +105,7 @@ p {
     justify-content: space-between;
     align-items: flex-end;
     height: 200px;
-    margin-top: 50px;
+    margin-top: 5px;
     background-color: #fff;
     padding: 20px;
     border-radius: 10px;
@@ -128,6 +147,16 @@ p {
 	padding: 20px;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Cień */
 	z-index: 10; /* Ustawiamy wyższy z-index dla pop-up */
+}
+
+.pogoda {
+	display: block; /* Ukryte domyślnie */
+	position: absolute;  /*Pozycjonowanie absolutne w odniesieniu do najbliższego elementu rodzica */
+	top: 10px; /* Wyśrodkowanie w pionie */
+	right: 0px; /* Wyśrodkowanie w poziomie */
+	padding: 20px;
+	box-shadow: 0 0 4px rgba(0, 0, 0, 0.5); /* Cień */
+	z-index: 1; /* Ustawiamy wyższy z-index dla pop-up */
 }
 
 .kalendarz {
