@@ -3,45 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <title>Ogrzewanie</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=1.1">
+	<script src="https://js.hcaptcha.com/1/api.js" async defer></script>  <!captcha ES_4b30aa1a8e7a46d49286ed3e244bfdb6 > 
+	
 	
 	<script>
 		
 			
 			function czas_z_sekund(sekundy) 
 			{
-				const godziny = Math.floor(sekundy / 3600); // Obliczanie godzin
-				const minuty = Math.floor((sekundy % 3600) / 60); // Obliczanie minut
-				const pozostaleSekundy = sekundy % 60; // Obliczanie sekund
+				const godziny = Math.floor(sekundy / 3600);
+				const minuty = Math.floor((sekundy % 3600) / 60);
+				const pozostaleSekundy = sekundy % 60;
 				return `${godziny} h : ${minuty} min : ${pozostaleSekundy} sec`;
 			}
 			function zwiekszaj_licznik(id) 
 			{
-				var czasElement = document.getElementById(id); // Odczytujemy element
-				var czas = parseInt(czasElement.textContent); // Odczytujemy i parsujemy wartość jako liczbę
-				czasElement.textContent = czas_z_sekund(czas); // Aktualizujemy zawartość elementu
+				var czasElement = document.getElementById(id);
+				var czas = parseInt(czasElement.textContent); // odczytujemy i parsujemy wartość jako liczbę
+				czasElement.textContent = czas_z_sekund(czas);
 				setInterval(() => {
-					czas++; // Zwiększamy wartość o 1
-					czasElement.textContent = czas_z_sekund(czas); // Aktualizujemy zawartość elementu
-				}, 1000); // Aktualizacja co sekundę
+					czas++;
+					czasElement.textContent = czas_z_sekund(czas);
+				}, 1000); // aktualizacja co sekundę
 			}
 			function zmniejszaj_licznik(id) 
 			{
-				var czasElement = document.getElementById(id); // Odczytujemy element
-				var czas = parseInt(czasElement.textContent); // Odczytujemy i parsujemy wartość jako liczbę
-				czasElement.textContent = czas_z_sekund(czas); // Aktualizujemy zawartość elementu
+				var czasElement = document.getElementById(id);
+				var czas = parseInt(czasElement.textContent); // odczytujemy i parsujemy wartość jako liczbę
+				czasElement.textContent = czas_z_sekund(czas);
 				setInterval(() => {
-					czas--; // Zwiększamy wartość o 1
-					czasElement.textContent = czas_z_sekund(czas); // Aktualizujemy zawartość elementu
+					czas--;
+					czasElement.textContent = czas_z_sekund(czas);
 					if(czas<=0)
 					{
 						czasElement.textContent = "0:0:0";
-						setTimeout(() => { window.location.reload(); }, 7000);
+						setTimeout(() => { window.location.reload(); }, 9000);
 						//window.location.href = window.location.href;
 						//window.location.reload();
 						//<button onclick="window.location.reload()">Odśwież stronę</button>
 					}
-				}, 1000); // Aktualizacja co sekundę
+				}, 1000); // aktualizacja co sekundę
 			}
 
 			function updateValue(sekundy) 
@@ -51,26 +53,13 @@
 				document.getElementById('czas').textContent = `${godziny} h ${minuty} min`;
 			}
 			
-			//function ktorypop(numer)
-			//{
-				
-				//let okienko = document.getElementById('okienko');
-				
-
-				//numer.style.border-width = '1px';
-				//	okienko.style.display = 'block';
-				
-				//slupek.addEventListener('mouseout', () => {
-				//	okienko.style.display = 'none';
-				//});
-			//}
-			
+			//po załadowaniu dokumentu
 			document.addEventListener('DOMContentLoaded', () => {
 				
 				updateValue(document.getElementById('suwak').value);
 			
 			
-			
+				//czy najechano na słupki
 				for(let i=1; i<=12; i++)
 				{
 					const slupek = document.getElementById('slupek' + i);
@@ -91,16 +80,23 @@
     </script>
 </head>
 <body>
-    <h1>Ogrzewanie</h1>
+    <h1>Sterowanie Ogrzewaniem</h1>
 
     <form method="post" action="" class="animacja-wlaczania">
         <label for="pin">Hasło:</label>
-        <input type="password" maxlength="8" name="pin" id="pin">
+        <input type="password" maxlength="80" name="pin" id="pin">
         
         <label for="suwak">Ustaw czas grzania:</label>
         <input type="range" id="suwak" name="autooff" min="1800" max="36000" value="10800" oninput="updateValue(this.value)">
         <span id="czas">3 h 0 min</span>
-
+		<?php
+			$proby = json_decode(file_get_contents('proby.json'), true);
+			if($proby['i']>4)
+			{
+				echo("<div class='h-captcha' data-sitekey='0da84802-f86e-4ac0-b018-d6405eda4792'></div>");
+			}
+			
+		?>
         <input style="cursor: pointer" type="submit" value="ON / OFF" name="onoff">
     </form>
 
@@ -161,6 +157,7 @@
 		}
 		
 		
+		
 
 		
         $plik = 'dane.json';
@@ -169,14 +166,33 @@
 		
 		
         if (isset($_POST['onoff'])) 
-		{
-			if($_POST['pin'] == "admin")
+		{	
+			$zdaneCaptcha = true;
+			
+			if($proby['i']>5)
+			{
+				$secretKey = "ES_4b30aa1a8e7a46d49286ed3e244bfdb6";
+				$response = $_POST['h-captcha-response'];
+
+				// Sprawdzenie poprawności hCaptcha
+				$verify = file_get_contents("https://hcaptcha.com/siteverify?secret={$secretKey}&response={$response}");
+				$captchaSuccess = json_decode($verify);
+
+				$zdaneCaptcha = $captchaSuccess->success; // zmienna bool
+			}
+			
+			if($_POST['pin'] == "admin" && $zdaneCaptcha)
 			{
 				header('Location: /admin.php');// przejscie do sekcji admin
+				exit();
 			}
 			//session_start();
-			if ($_POST['pin'] == "456") 
-			{
+			
+			if ($_POST['pin'] == "456" && $zdaneCaptcha) 
+			{	
+				$proby['i']=0;
+				file_put_contents('proby.json', json_encode($proby));				
+				
 				if($wlacz==0)
 				{
 					$wlacz=1;
@@ -191,14 +207,18 @@
                 $dane['przycisk'] = intval($wlacz);
                 file_put_contents($plik, json_encode($dane));
 				
-				// Po przetworzeniu formularza przekierowujemy na stronę metodą GET
+				// Po przetworzeniu formularza przekierowujemy na stronę jescze raz, aby po odświeżeniu nie przesyłał się ponownie formularz 
 				header('Location: '.$_SERVER['PHP_SELF']);
-				//exit();
+				exit();
             } 
 			else 
 			{
                 echo("<p class=\"status grzeje\" style=\"color: red;\">Hasło niepoprawne</p><br><br><br><br>");
+				$proby['i']++;
+				file_put_contents('proby.json', json_encode($proby));
             }
+			
+			
 
         }
 			
@@ -219,25 +239,21 @@
             
 			echo("<p>Czas pracy ogrzewania:</p>");
 			echo("<div class='status liczniki'><p>Licznik główny:</p><p id='licznik'>{$dane["licznik"]}</p></div>");
-			//echo("<p id='licznik'>{$dane["licznik"]}</p>");
 			echo("<div class='status liczniki'><p>Dzisiaj:</p><p id='dzis'>{$dane["dzis"]}</p></div>");
 			echo("<div class='status liczniki'><p>Od ostatniego włączenia:</p><p id='aktualnie'>{$dane["aktualnie"]}</p></div>");
 			
-			//echo("<p class='status liczniki'>Czas pracy od ostatniego włączenia:<br></p>");
-			//echo("<p id='aktualnie'>{$dane["aktualnie"]}</p>");
-			
+			//odswieżanie liczników przez js
 			echo("<script> zmniejszaj_licznik('licznik_autooff');</script>");
 			echo("<script> zwiekszaj_licznik('licznik'); </script>");
 			echo("<script> zwiekszaj_licznik('aktualnie'); </script>");
 			echo("<script> zwiekszaj_licznik('dzis'); </script>");			
         }
 		
-		// Użycie wttr.in do pobrania pogody w Warszawie
+		
 		$pogoda = file_get_contents("https://wttr.in/Warsaw?format=%t");
-		// Sprawdzenie, czy dane zostały poprawnie pobrane
 		if ($pogoda !== false) 
 		{
-			echo "<div class='pogoda'>Aktualna temperatura w Warszawie:<a href='https://wttr.in/Warsaw?format=1'> $pogoda</a></div>";
+			echo "<div class='pogoda'>Aktualna temperatura w Warszawie:<a href='https://wttr.in/'> $pogoda</a></div>";
 		} 
 		else 
 		{
@@ -249,9 +265,10 @@
 
 
 	<br><br><br><br>
-	<p>zużycie w poszczególnych miesiącach:</p>
+	<p>Zużycie w poszczególnych miesiącach:</p>
     <div class="dane-miesieczne">
         <?php
+		
 		
 		$plik = 'kalendarz.json';
 		$kalendarz = json_decode(file_get_contents($plik), true)['k'];
@@ -324,7 +341,7 @@
                         <button id='slupek{$miesiac}' class='slupek' style='height: {$wysokosc}%; {$kolor_słupek}'>
                             {$zuzycie}h
                         </button>
-                        <span>{$miesiac}</span>
+                        <span>{$miesiac_tekst}</span>
                     </div>
                 ";
             }
